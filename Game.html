@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Click the Target Game</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+    }#gameArea {
+  width: 300px;
+  height: 300px;
+  margin: 20px auto;
+  background: #222;
+  position: relative;
+  border-radius: 10px;
+}
+#target {
+  width: 40px;
+  height: 40px;
+  background: red;
+  border-radius: 50%;
+  position: absolute;
+  cursor: pointer;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+  </style>
+</head>
+<body>
+  <h1>🎯 Click the Target!</h1>
+  <p>Score: <span id="score">0</span></p>
+  <p>Time: <span id="time">10</span>s</p>
+  <div id="gameArea">
+    <div id="target"></div>
+  </div>
+  <button onclick="startGame()">Start Game</button>  <script>
+    const target = document.getElementById("target");
+    const scoreDisplay = document.getElementById("score");
+    const timeDisplay = document.getElementById("time");
+
+    let score = 0;
+    let time = 10;
+    let gameInterval;
+    let timer;
+
+    function moveTarget() {
+      const x = Math.random() * 260;
+      const y = Math.random() * 260;
+      target.style.left = x + "px";
+      target.style.top = y + "px";
+    }
+
+    target.onclick = function () {
+      score++;
+      scoreDisplay.textContent = score;
+      moveTarget();
+    };
+
+    function startGame() {
+      score = 0;
+      time = 10;
+      scoreDisplay.textContent = score;
+      timeDisplay.textContent = time;
+
+      moveTarget();
+
+      gameInterval = setInterval(moveTarget, 800);
+
+      timer = setInterval(() => {
+        time--;
+        timeDisplay.textContent = time;
+
+        if (time <= 0) {
+          clearInterval(gameInterval);
+          clearInterval(timer);
+          alert("Game Over! Your score: " + score);
+        }
+      }, 1000);
+    }
+  </script></body>
+</html>

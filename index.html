@@ -1,90 +1,136 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Click the Target Game</title>
+  <title>Snake Game Mobile</title>
   <style>
     body {
       text-align: center;
-      font-family: Arial;
       background: #111;
       color: white;
+      font-family: Arial;
     }
-
-    #gameArea {
-      width: 300px;
-      height: 300px;
+    canvas {
+      background: black;
+      display: block;
       margin: 20px auto;
-      background: #222;
-      position: relative;
+      border: 2px solid white;
     }
-
-    #target {
-      width: 40px;
-      height: 40px;
-      background: blue;
-      border-radius: 50%;
-      position: absolute;
-      cursor: pointer;
+    .controls {
+      margin-top: 10px;
+    }
+    button {
+      width: 70px;
+      height: 70px;
+      font-size: 24px;
+      margin: 5px;
+      border-radius: 10px;
+      border: none;
+      background: #333;
+      color: white;
+    }
+    button:active {
+      background: #666;
     }
   </style>
 </head>
 <body>
 
-<h1>🎯 Click the Target!</h1>
-<p>Score: <span id="score">0</span></p>
-<p>Time: <span id="time">10</span>s</p>
+<h1>🐍 Snake Game</h1>
+<canvas id="game" width="400" height="400"></canvas>
 
-<div id="gameArea">
-  <div id="target"></div>
+<div class="controls">
+  <div>
+    <button onclick="setDirection('UP')">⬆️</button>
+  </div>
+  <div>
+    <button onclick="setDirection('LEFT')">⬅️</button>
+    <button onclick="setDirection('DOWN')">⬇️</button>
+    <button onclick="setDirection('RIGHT')">➡️</button>
+  </div>
 </div>
 
-<button onclick="startGame()">Start Game</button>
-
 <script>
-  const target = document.getElementById("target");
-  const scoreDisplay = document.getElementById("score");
-  const timeDisplay = document.getElementById("time");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-  let score = 0;
-  let time = 10;
-  let gameInterval;
-  let timer;
+const box = 20;
+let snake = [{ x: 200, y: 200 }];
+let food = {
+  x: Math.floor(Math.random() * 20) * box,
+  y: Math.floor(Math.random() * 20) * box
+};
 
-  function moveTarget() {
-    const x = Math.random() * 260;
-    const y = Math.random() * 260;
-    target.style.left = x + "px";
-    target.style.top = y + "px";
-  }
+let direction = "RIGHT";
+let score = 0;
 
-  target.onclick = function () {
+// Keyboard control
+document.addEventListener("keydown", (event) => {
+  if (event.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+  if (event.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+  if (event.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+  if (event.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+});
+
+// Button control
+function setDirection(dir) {
+  if (dir === "LEFT" && direction !== "RIGHT") direction = "LEFT";
+  if (dir === "UP" && direction !== "DOWN") direction = "UP";
+  if (dir === "RIGHT" && direction !== "LEFT") direction = "RIGHT";
+  if (dir === "DOWN" && direction !== "UP") direction = "DOWN";
+}
+
+function draw() {
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, 400, 400);
+
+  snake.forEach((segment, index) => {
+    ctx.fillStyle = index === 0 ? "lime" : "green";
+    ctx.fillRect(segment.x, segment.y, box, box);
+  });
+
+  ctx.fillStyle = "red";
+  ctx.fillRect(food.x, food.y, box, box);
+
+  let headX = snake[0].x;
+  let headY = snake[0].y;
+
+  if (direction === "LEFT") headX -= box;
+  if (direction === "UP") headY -= box;
+  if (direction === "RIGHT") headX += box;
+  if (direction === "DOWN") headY += box;
+
+  if (headX === food.x && headY === food.y) {
     score++;
-    scoreDisplay.textContent = score;
-    moveTarget();
-  };
-
-  function startGame() {
-    score = 0;
-    time = 10;
-    scoreDisplay.textContent = score;
-    timeDisplay.textContent = time;
-
-    moveTarget();
-
-    gameInterval = setInterval(moveTarget, 800);
-
-    timer = setInterval(() => {
-      time--;
-      timeDisplay.textContent = time;
-
-      if (time <= 0) {
-        clearInterval(gameInterval);
-        clearInterval(timer);
-        alert("Game Over! Score: " + score);
-      }
-    }, 1000);
+    food = {
+      x: Math.floor(Math.random() * 20) * box,
+      y: Math.floor(Math.random() * 20) * box
+    };
+  } else {
+    snake.pop();
   }
+
+  let newHead = { x: headX, y: headY };
+
+  if (
+    headX < 0 || headY < 0 ||
+    headX >= 400 || headY >= 400 ||
+    collision(newHead, snake)
+  ) {
+    clearInterval(game);
+    alert("Game Over! Score: " + score);
+  }
+
+  snake.unshift(newHead);
+
+  ctx.fillStyle = "white";
+  ctx.fillText("Score: " + score, 10, 20);
+}
+
+function collision(head, body) {
+  return body.some(segment => segment.x === head.x && segment.y === head.y);
+}
+
+const game = setInterval(draw, 120);
 </script>
 
 </body>
